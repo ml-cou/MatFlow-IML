@@ -34,11 +34,17 @@ To run this project with Python 3.10, follow these steps:
 
 3. **Clone the repository:**
    ```
-   git clone https://github.com/ml-cou/Matflow-nodebased-backend.git
+   git clone https://github.com/ml-cou/MatFlow-IML.git
    ```
    Navigate into the project directory:
    ```
-   cd Matflow-nodebased-backend
+   cd server
+   python manage.py runserver
+   ```
+   ```
+   cd client
+   npm run install
+   npm run dev
    ```
 
 4. **Install the required packages:**
