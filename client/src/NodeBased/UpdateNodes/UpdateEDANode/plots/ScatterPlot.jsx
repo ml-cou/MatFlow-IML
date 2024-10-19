@@ -18,6 +18,7 @@ function ScatterPlot({ csvData, setPlotOption }) {
   const plotOption = useSelector((state) => state.EDA.plotOption);
 
   useEffect(() => {
+    console.log(plotOption);
     if (plotOption && Object.keys(plotOption).length > 0) {
       setActiveHueColumn(plotOption.hue);
       setTitle(plotOption.title);
