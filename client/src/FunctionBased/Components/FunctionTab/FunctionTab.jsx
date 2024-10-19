@@ -12,6 +12,7 @@ import { SimpleTreeView, TreeItem } from "@mui/x-tree-view";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import { styled } from "@mui/material";
+import { PiGraph } from "react-icons/pi";
 
 const StyledTreeItem = styled(TreeItem)(({ theme }) => ({
   color: "#FFFFFF",
@@ -234,6 +235,39 @@ const functionTreeData = [
       {
         key: "8-1",
         label: "InvML",
+      },
+    ],
+  },
+  {
+    key: "9",
+    label: "Graph",
+    icon: <PiGraph size={"20"} />,
+    children: [
+      {
+        key: "9-2",
+        label: "Graph Generation",
+      },
+      {
+        key: "9-3",
+        label: "Graph Merge",
+      },
+      {
+        key: "9-4",
+        label: "Graph Model Build",
+      },
+      {
+        key: "9-5",
+        label: "Graph Model Comparison",
+      },
+
+      {
+        key: "9-6",
+        label: "Show Models",
+      },
+
+      {
+        key: "9-7",
+        label: "Prediction",
       },
     ],
   },

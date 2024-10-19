@@ -1,31 +1,35 @@
 import { Checkbox, Input, Loading } from "@nextui-org/react";
-import React, { useEffect, useState } from "react";
-import Plot from "react-plotly.js";
+import React, { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import SingleDropDown from "../../Components/SingleDropDown/SingleDropDown";
+import MultipleDropDown from "../../Components/MultipleDropDown/MultipleDropDown";
+import LayoutSelector from "../../Components/LayoutSelector/LayoutSelector"; // Import the LayoutSelector component
 
 function CountPlot({ csvData }) {
-  // const [csvData, setCsvData] = useState();
+  const plotRef = useRef(null); // Reference to the plot (if needed)
   const activeCsvFile = useSelector((state) => state.uploadedFile.activeFile);
-  const [plotlyData, setPlotlyData] = useState();
+
+  const [plotlyData, setPlotlyData] = useState([]); // Initialize as an array
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null); // State for error handling
 
   const [stringColumn, setStringColumn] = useState([]);
-  const [activeStringColumn, setActiveStringColumn] = useState("");
+  const [activeStringColumn, setActiveStringColumn] = useState([]); // Categorical variables
   const [activeHueColumn, setActiveHueColumn] = useState("");
   const [orientation, setOrientation] = useState("Vertical");
-  const [showTitle, setShowTitle] = useState(false);
-  const [titleValue, setTitleValue] = useState("");
-  const [title, setTitle] = useState();
   const [annotate, setAnnotate] = useState(false);
 
+  // Populate column names based on CSV data
   useEffect(() => {
-    if (activeCsvFile && activeCsvFile.name) {
-      const getData = async () => {
+    if (activeCsvFile && activeCsvFile.name && csvData.length > 0) {
+      const getData = () => {
         const tempStringColumn = [];
 
+        // Iterate over the first row to determine column types
         Object.entries(csvData[0]).forEach(([key, value]) => {
-          if (typeof csvData[0][key] === "string") tempStringColumn.push(key);
+          if (typeof value === "string" || isNaN(value)) {
+            tempStringColumn.push(key);
+          }
         });
 
         setStringColumn(tempStringColumn);
@@ -35,55 +39,64 @@ function CountPlot({ csvData }) {
     }
   }, [activeCsvFile, csvData]);
 
-  useEffect(() => {
-    if (activeStringColumn && csvData) {
-      const fetchData = async () => {
-        setLoading(true);
-        setPlotlyData("");
-        const resp = await fetch("http://127.0.0.1:8000/api/eda_countplot/", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            cat: activeStringColumn || "-",
-            hue: activeHueColumn || "-",
-            orient: orientation,
-            annote: annotate,
-            title: title || "",
-            file: csvData,
-          }),
-        });
-        let data = await resp.json();
-        data = JSON.parse(data);
-        setPlotlyData(data);
-        setLoading(false);
-      };
+  const handleGenerate = async () => {
+    try {
+      setLoading(true);
+      setPlotlyData([]);
+      setError(null); // Reset error state
 
-      fetchData();
+      const resp = await fetch("http://127.0.0.1:8000/api/eda/countplot/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          cat: activeStringColumn.length > 0 ? activeStringColumn : "-", // Handle multiple categorical variables
+          hue: activeHueColumn || "-",
+          orient: orientation,
+          annotate: annotate, // Corrected parameter name
+          title: "", // Remove local title; handled by LayoutSelector
+          file: csvData,
+        }),
+      });
+
+      if (!resp.ok) {
+        const errorData = await resp.json();
+        throw new Error(errorData.error || "Failed to fetch plots.");
+      }
+
+      let data = await resp.json();
+      console.log(data);
+
+      // Ensure plotlyData is an array
+      if (Array.isArray(data.plotly)) {
+        setPlotlyData(data.plotly);
+      } else if (typeof data.plotly === "object") {
+        setPlotlyData([data.plotly]); // Wrap in array if single plot
+      } else {
+        setPlotlyData([]); // Empty array if unexpected format
+      }
+    } catch (error) {
+      console.error("Error fetching Plotly data:", error);
+      setError(error.message || "An unexpected error occurred.");
+    } finally {
+      setLoading(false);
     }
-  }, [
-    activeHueColumn,
-    activeStringColumn,
-    orientation,
-    title,
-    annotate,
-    csvData,
-  ]);
+  };
 
   return (
     <div>
-      <div className="flex items-center gap-8 mt-8">
+      {/* Dropdowns for selecting variables */}
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 items-center gap-8 mt-8">
         <div className="w-full">
           <p className="text-lg font-medium tracking-wide">
-            Categorical Variable
+            Categorical Variable(s)
           </p>
-          <SingleDropDown
+          <MultipleDropDown
             columnNames={stringColumn}
-            onValueChange={setActiveStringColumn}
+            setSelectedColumns={setActiveStringColumn}
           />
         </div>
-
         <div className="w-full">
           <p className="text-lg font-medium tracking-wide">Hue</p>
           <SingleDropDown
@@ -91,15 +104,11 @@ function CountPlot({ csvData }) {
             columnNames={stringColumn}
           />
         </div>
-        <div className="w-full flex flex-col gap-1">
-          <label htmlFor="" className="text-lg font-medium tracking-wide">
-            Orientation
-          </label>
+        <div className="w-full">
+          <p className="text-lg font-medium tracking-wide">Orientation</p>
           <select
-            name=""
-            id=""
             value={orientation}
-            className="bg-transparent p-2 focus:border-[#06603b] border-2 rounded-lg"
+            className="bg-transparent p-2 focus:border-[#06603b] border-2 rounded-lg w-full"
             onChange={(e) => setOrientation(e.target.value)}
           >
             <option value="Vertical">Vertical</option>
@@ -107,33 +116,29 @@ function CountPlot({ csvData }) {
           </select>
         </div>
       </div>
+
+      {/* Checkbox for Annotate */}
       <div className="flex items-center gap-4 mt-4 tracking-wider">
-        <Checkbox color="success" onChange={(e) => setShowTitle(e.valueOf())}>
-          Title
-        </Checkbox>
-        <Checkbox color="success" onChange={(e) => setAnnotate(e.valueOf())}>
+        <Checkbox
+          color="success"
+          isSelected={annotate}
+          onChange={(e) => setAnnotate(e.valueOf())}
+        >
           Annotate
         </Checkbox>
       </div>
-      {showTitle && (
-        <div className="mt-4">
-          <Input
-            clearable
-            bordered
-            color="success"
-            size="lg"
-            label="Input Title"
-            placeholder="Enter your desired title"
-            fullWidth
-            value={titleValue}
-            onChange={(e) => setTitleValue(e.target.value)}
-            helperText="Press Enter to apply"
-            onKeyDown={(e) => {
-              if (e.key === "Enter") setTitle(titleValue);
-            }}
-          />
-        </div>
-      )}
+
+      <div className="flex justify-end mt-4 my-12">
+        <button
+          className="border-2 px-6 tracking-wider bg-primary-btn text-white font-medium rounded-md py-2"
+          onClick={handleGenerate}
+          disabled={loading}
+        >
+          Generate
+        </button>
+      </div>
+
+      {/* Loading Indicator */}
       {loading && (
         <div className="grid place-content-center mt-12 w-full h-full">
           <Loading color={"success"} size="xl">
@@ -141,15 +146,12 @@ function CountPlot({ csvData }) {
           </Loading>
         </div>
       )}
-      {plotlyData && (
-        <div className="flex justify-center mt-4">
-          <Plot
-            data={plotlyData?.data}
-            layout={{ ...plotlyData.layout, showlegend: true }}
-            config={{ editable: true, responsive: true }}
-          />
-        </div>
-      )}
+
+      {/* Error Message */}
+      {error && <div className="mt-4 text-red-500 text-center">{error}</div>}
+
+      {/* Render LayoutSelector with Plotly Data */}
+      {plotlyData.length > 0 && <LayoutSelector plotlyData={plotlyData} />}
     </div>
   );
 }

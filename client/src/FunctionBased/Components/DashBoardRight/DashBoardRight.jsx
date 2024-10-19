@@ -40,6 +40,7 @@ import ReverseML from "../../Functions/ReverseML/ReverseML";
 import TimeSeriesAnalysis from "../../Functions/TimeSeriesAnalysis/TimeSeriesAnalysis";
 import Imputation from "../../Functions/Feature Engineering/Imputation/Imputation";
 import InvML from "../../Functions/Feature Engineering/InvML/InvML";
+import GraphGeneration from "../../Functions/Graph/GraphGeneration";
 
 function DashBoardRight() {
   const activeFunction = useSelector((state) => state.sideBar.activeFunction);
@@ -224,8 +225,11 @@ function DashBoardRight() {
             activeFunction === "Model Deployment" && (
               <ModelDeployment csvData={csvData} />
             )}
+
+          {/* Graph */}
+          {activeFunction && activeFunction === "Graph Generation" && <GraphGeneration />}
         </>
-      ) : (!activeFile || !activeFile.name) ? (
+      ) : !activeFile || !activeFile.name ? (
         <div className="w-full h-full grid place-content-center">
           <h1 className="text-3xl tracking-wide text-center">
             Please select a file to continue...

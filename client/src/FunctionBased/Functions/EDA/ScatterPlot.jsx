@@ -1,22 +1,25 @@
+// src/FunctionBased/Components/ScatterPlot/ScatterPlot.jsx
+
 import { Checkbox, Input, Loading } from "@nextui-org/react";
-import React, { useEffect, useState } from "react";
-import Plot from "react-plotly.js";
+import React, { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import SingleDropDown from "../../Components/SingleDropDown/SingleDropDown";
+import MultipleDropDown from "../../Components/MultipleDropDown/MultipleDropDown";
+import LayoutSelector from "../../Components/LayoutSelector/LayoutSelector"; // Import the new component
 
 function ScatterPlot({ csvData }) {
+  const plotRef = useRef(null);
   const activeCsvFile = useSelector((state) => state.uploadedFile.activeFile);
-  const [plotlyData, setPlotlyData] = useState();
+  const [plotlyData, setPlotlyData] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null); // State for error handling
 
   const [stringColumn, setStringColumn] = useState([]);
   const [numberColumn, setNumberColumn] = useState([]);
-  const [x_var, setX_var] = useState("");
+  const [x_var, setX_var] = useState([]);
   const [y_var, setY_var] = useState("");
   const [activeHueColumn, setActiveHueColumn] = useState("");
-  const [showTitle, setShowTitle] = useState(false);
-  const [titleValue, setTitleValue] = useState("");
-  const [title, setTitle] = useState();
+  const [title, setTitle] = useState("");
 
   useEffect(() => {
     if (activeCsvFile && activeCsvFile.name) {
@@ -25,7 +28,9 @@ function ScatterPlot({ csvData }) {
         const tempNumberColumn = [];
 
         Object.entries(csvData[0]).forEach(([key, value]) => {
-          if (typeof csvData[0][key] === "string") tempStringColumn.push(key);
+          // Improved type checking
+          if (typeof value === "string" || isNaN(value))
+            tempStringColumn.push(key);
           else tempNumberColumn.push(key);
         });
 
@@ -37,40 +42,53 @@ function ScatterPlot({ csvData }) {
     }
   }, [activeCsvFile, csvData]);
 
-  useEffect(() => {
-    if (x_var && y_var && csvData) {
-      const fetchData = async () => {
-        setLoading(true);
-        setPlotlyData("");
-        const resp = await fetch("http://127.0.0.1:8000/api/eda_scatterplot/", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            x_var,
-            y_var,
-            hue: activeHueColumn || "-",
-            title: title || "",
-            file: csvData,
-          }),
-        });
-        let data = await resp.json();
-        data = JSON.parse(data);
-        setPlotlyData(data);
-        setLoading(false);
-      };
+  const handleGenerate = async () => {
+    try {
+      setLoading(true);
+      setPlotlyData([]);
+      setError(null); // Reset error state
+      const resp = await fetch("http://127.0.0.1:8000/api/eda/scatterplot/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          x_var,
+          y_var,
+          hue: activeHueColumn || "-",
+          title: title || "",
+          file: csvData,
+        }),
+      });
 
-      fetchData();
+      if (!resp.ok) {
+        const errorData = await resp.json();
+        throw new Error(errorData.error || "Failed to fetch plots.");
+      }
+
+      let data = await resp.json();
+      console.log(data);
+      data = data.plotly || [];
+      setPlotlyData(data);
+    } catch (error) {
+      console.error("Error fetching Plotly data:", error);
+      setError(error.message || "An unexpected error occurred.");
+    } finally {
+      setLoading(false);
     }
-  }, [x_var, y_var, activeHueColumn, csvData, title]);
+  };
 
   return (
     <div>
-      <div className="flex items-center gap-8 mt-8">
+      {/* Dropdowns for selecting variables */}
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 items-center gap-8 mt-8">
         <div className="w-full">
-          <p className="text-lg font-medium tracking-wide">X Variable</p>
-          <SingleDropDown columnNames={numberColumn} onValueChange={setX_var} />
+          <p className="text-lg font-medium tracking-wide">X Variable(s)</p>
+          <MultipleDropDown
+            columnNames={numberColumn}
+            defaultValue={x_var}
+            setSelectedColumns={setX_var}
+          />
         </div>
         <div className="w-full">
           <p className="text-lg font-medium tracking-wide">Y Variable</p>
@@ -84,30 +102,18 @@ function ScatterPlot({ csvData }) {
           />
         </div>
       </div>
-      <div className="flex items-center gap-4 mt-4 tracking-wider">
-        <Checkbox color="success" onChange={(e) => setShowTitle(e.valueOf())}>
-          Title
-        </Checkbox>
+
+      <div className="flex justify-end mt-4 my-12">
+        <button
+          className="border-2 px-6 tracking-wider bg-primary-btn text-white font-medium rounded-md py-2"
+          onClick={handleGenerate}
+          disabled={loading}
+        >
+          Generate
+        </button>
       </div>
-      {showTitle && (
-        <div className="mt-4">
-          <Input
-            clearable
-            bordered
-            color="success"
-            size="lg"
-            label="Input Title"
-            placeholder="Enter your desired title"
-            fullWidth
-            value={titleValue}
-            onChange={(e) => setTitleValue(e.target.value)}
-            helperText="Press Enter to apply"
-            onKeyDown={(e) => {
-              if (e.key === "Enter") setTitle(titleValue);
-            }}
-          />
-        </div>
-      )}
+
+      {/* Loading Indicator */}
       {loading && (
         <div className="grid place-content-center mt-12 w-full h-full">
           <Loading color={"success"} size="xl">
@@ -115,15 +121,12 @@ function ScatterPlot({ csvData }) {
           </Loading>
         </div>
       )}
-      {plotlyData && (
-        <div className="flex justify-center mt-4">
-          <Plot
-            data={plotlyData?.data}
-            layout={{ ...plotlyData.layout, showlegend: true }}
-            config={{ editable: true, responsive: true }}
-          />
-        </div>
-      )}
+
+      {/* Error Message */}
+      {error && <div className="mt-4 text-red-500 text-center">{error}</div>}
+
+      {/* Render LayoutSelector with Plotly Data */}
+      {plotlyData.length > 0 && <LayoutSelector plotlyData={plotlyData} />}
     </div>
   );
 }

@@ -1,12 +1,15 @@
 import { Loading } from "@nextui-org/react";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Plot from "react-plotly.js";
 import { useSelector } from "react-redux";
 import MultipleDropDown from "../../Components/MultipleDropDown/MultipleDropDown";
 import SingleDropDown from "../../Components/SingleDropDown/SingleDropDown";
+import Plotly from "plotly.js-dist";
+import LayoutSelector from "../../Components/LayoutSelector/LayoutSelector";
 
 function CustomPlot({ csvData }) {
   // const [csvData, setCsvData] = useState();
+  const plotRef = useRef(null);
   const activeCsvFile = useSelector((state) => state.uploadedFile.activeFile);
   const [numberColumn, setNumberColumn] = useState([]);
   const [stringColumn, setStringColumn] = useState([]);
@@ -14,7 +17,8 @@ function CustomPlot({ csvData }) {
   const [y_bar, setY_var] = useState("");
   const [activeHue, setActiveHue] = useState("");
   const [loading, setLoading] = useState(false);
-  const [plotlyData, setPlotlyData] = useState();
+  const [plotlyData, setPlotlyData] = useState([]);
+  const [error, setError] = useState(null); // State for error handling
 
   useEffect(() => {
     if (activeCsvFile && activeCsvFile.name) {
@@ -29,43 +33,49 @@ function CustomPlot({ csvData }) {
 
         setStringColumn(tempStringColumn);
         setNumberColumn(tempNumberColumn);
-        setY_var(tempNumberColumn[0]);
       };
 
       getData();
     }
   }, [activeCsvFile, csvData]);
 
-  useEffect(() => {
-    if (x_var && x_var.length > 0 && CanvasCaptureMediaStreamTrack) {
-      const fetchData = async () => {
-        setLoading(true);
-        setPlotlyData("");
-        const resp = await fetch("http://127.0.0.1:8000/api/eda_customplot/", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            file: csvData,
-            x_var,
-            y_var: y_bar,
-            hue: activeHue || "None",
-          }),
-        });
-        let data = await resp.json();
-        data = JSON.parse(data);
-        setPlotlyData(data);
-        setLoading(false);
-      };
+  const handleGenerate = async () => {
+    try {
+      setLoading(true);
+      setPlotlyData([]);
+      const resp = await fetch("http://127.0.0.1:8000/api/eda/customplot/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          file: csvData,
+          x_var,
+          y_var: y_bar,
+          hue: activeHue || "None",
+        }),
+      });
 
-      fetchData();
+      if (!resp.ok) {
+        const errorData = await resp.json();
+        throw new Error(errorData.error || "Failed to fetch plots.");
+      }
+
+      let data = await resp.json();
+      console.log(data)
+      data = data.plotly;
+      setPlotlyData(data);
+    } catch (error) {
+      console.error("Error fetching Plotly data:", error);
+      setError(error.message || "An unexpected error occurred.");
+    } finally {
+      setLoading(false);
     }
-  }, [x_var, y_bar, activeHue, csvData]);
+  };
 
   return (
     <div>
-      <div className="flex items-center gap-8 mt-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 items-center gap-8 mt-8">
         <div className="w-full">
           <p className="text-lg font-medium tracking-wide">X Variable</p>
           <MultipleDropDown
@@ -90,6 +100,16 @@ function CustomPlot({ csvData }) {
         </div>
       </div>
 
+      <div className="flex justify-end mt-4 my-12">
+        <button
+          className="border-2 px-6 tracking-wider bg-primary-btn text-white font-medium rounded-md py-2"
+          onClick={handleGenerate}
+          disabled={loading}
+        >
+          Generate
+        </button>
+      </div>
+
       {loading && (
         <div className="grid place-content-center mt-12 w-full h-full">
           <Loading color={"success"} size="xl">
@@ -97,15 +117,12 @@ function CustomPlot({ csvData }) {
           </Loading>
         </div>
       )}
-      {plotlyData && (
-        <div className="flex justify-center mt-4">
-          <Plot
-            data={plotlyData?.data}
-            layout={{ ...plotlyData.layout, showlegend: true }}
-            config={{  editable: true, responsive: true }}
-          />
-        </div>
-      )}
+
+      {/* Error Message */}
+      {error && <div className="mt-4 text-red-500 text-center">{error}</div>}
+
+      {/* Render LayoutSelector with Plotly Data */}
+      {plotlyData.length > 0 && <LayoutSelector plotlyData={plotlyData} />}
     </div>
   );
 }

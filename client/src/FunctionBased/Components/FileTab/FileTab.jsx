@@ -174,7 +174,7 @@ function FileTab() {
     if (uploadedFile) {
       const formData = new FormData();
       formData.append("file", uploadedFile);
-      formData.append("folder", activeFolder || "");
+      formData.append("folder", activeFolder || ""); // Upload to root if no folder selected
 
       try {
         const response = await fetch("http://localhost:8000/api/upload/", {
@@ -205,7 +205,7 @@ function FileTab() {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               folderName: newFolderName,
-              parent: activeFolder || "",
+              parent: activeFolder || "", // Use empty string for root folder
             }),
           }
         );
@@ -221,6 +221,11 @@ function FileTab() {
         toast.error("Error creating folder!");
       }
     }
+  };
+
+  // Function to clear active folder
+  const clearActiveFolder = () => {
+    setActiveFolder("");
   };
 
   const renderFolderStructure = (structure, parentFolder = "") => {
@@ -363,6 +368,18 @@ function FileTab() {
           Upload
         </button>
       </div>
+
+      {/* Clear folder selection */}
+      {activeFolder && (
+        <div className="p-2 bg-gray-800 text-center">
+          <button
+            onClick={clearActiveFolder}
+            className="bg-red-500 text-xs text-white px-2 py-1 rounded hover:bg-red-700"
+          >
+            Clear Folder Selection (Upload to Root)
+          </button>
+        </div>
+      )}
     </div>
   );
 }

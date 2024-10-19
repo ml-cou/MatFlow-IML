@@ -1,86 +1,109 @@
+// src/FunctionBased/Components/RegPlot/RegPlot.jsx
+
 import { Checkbox, Input, Loading } from "@nextui-org/react";
 import React, { useEffect, useState } from "react";
-import Plot from "react-plotly.js";
 import { useSelector } from "react-redux";
 import SingleDropDown from "../../Components/SingleDropDown/SingleDropDown";
+import MultipleDropDown from "../../Components/MultipleDropDown/MultipleDropDown";
+import LayoutSelector from "../../Components/LayoutSelector/LayoutSelector.jsx"; // Import LayoutSelector
+import { toast } from "react-toastify"; // Import react-toastify for notifications
 
 function RegPlot({ csvData }) {
   const activeCsvFile = useSelector((state) => state.uploadedFile.activeFile);
-  const [plotlyData, setPlotlyData] = useState();
-  const [loading, setLoading] = useState(false);
 
   const [numberColumn, setNumberColumn] = useState([]);
-  const [x_var, setX_var] = useState("");
+  const [activeNumberColumns, setActiveNumberColumns] = useState([]);
   const [y_var, setY_var] = useState("");
-  const [showTitle, setShowTitle] = useState(false);
-  const [titleValue, setTitleValue] = useState("");
-  const [title, setTitle] = useState();
+  const [title, setTitle] = useState("");
   const [scatter, setScatter] = useState(true);
 
+  const [plotlyData, setPlotlyData] = useState([]); // Initialize as an empty array
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null); // State for error handling
+
+  // Extract numeric columns from CSV data
   useEffect(() => {
-    if (activeCsvFile && activeCsvFile.name) {
-      const getData = async () => {
-        const tempStringColumn = [];
-        const tempNumberColumn = [];
+    if (activeCsvFile && activeCsvFile.name && csvData.length > 0) {
+      const tempNumberColumn = [];
 
-        Object.entries(csvData[0]).forEach(([key, value]) => {
-          if (typeof csvData[0][key] === "string") tempStringColumn.push(key);
-          else tempNumberColumn.push(key);
+      csvData.forEach((row) => {
+        Object.entries(row).forEach(([key, value]) => {
+          if (typeof value !== "string" && !isNaN(value)) {
+            tempNumberColumn.push(key);
+          }
         });
+      });
 
-        setNumberColumn(tempNumberColumn);
-      };
-
-      getData();
+      // Remove duplicates
+      const uniqueNumberColumns = [...new Set(tempNumberColumn)];
+      setNumberColumn(uniqueNumberColumns);
     }
   }, [activeCsvFile, csvData]);
 
-  useEffect(() => {
-    if (x_var && y_var && csvData) {
-      const fetchData = async () => {
-        setLoading(true);
-        setPlotlyData("");
-        const resp = await fetch("http://127.0.0.1:8000/api/eda_regplot/", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            x_var,
-            y_var,
-            title: title || "",
-            scatter,
-            file: csvData,
-          }),
-        });
-        let data = await resp.json();
-        data = JSON.parse(data);
-        setPlotlyData(data);
-        setLoading(false);
-      };
+  const handleGenerate = async () => {
+    try {
+      setLoading(true);
+      setPlotlyData([]); // Reset plotlyData
+      setError(null); // Reset error state
 
-      fetchData();
+      const resp = await fetch("http://127.0.0.1:8000/api/eda/regplot/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          x_var: activeNumberColumns,
+          y_var,
+          title: title || "",
+          scatter,
+          file: csvData,
+        }),
+      });
+
+      if (!resp.ok) {
+        const errorData = await resp.json();
+        throw new Error(errorData.error || "Failed to fetch plots.");
+      }
+
+      const data = await resp.json();
+      console.log("Received data from backend:", data);
+
+      // Ensure plotlyData is an array
+      if (Array.isArray(data.plotly)) {
+        setPlotlyData(data.plotly);
+      } else if (typeof data.plotly === "object") {
+        setPlotlyData([data.plotly]); // Wrap single plot in an array
+      } else {
+        setPlotlyData([]); // Empty array if unexpected format
+      }
+    } catch (error) {
+      console.error("Error fetching Plotly data:", error);
+      setError(error.message || "An unexpected error occurred.");
+      toast.error(error.message || "An unexpected error occurred.");
+    } finally {
+      setLoading(false);
     }
-  }, [x_var, y_var, scatter, csvData, title]);
+  };
 
   return (
     <div>
-      <div className="flex items-center gap-8 mt-8">
+      {/* Dropdowns for selecting variables */}
+      <div className="grid grid-cols-1 md:grid-cols-3 items-center gap-8 mt-8">
         <div className="w-full">
           <p className="text-lg font-medium tracking-wide">X Variable</p>
-          <SingleDropDown columnNames={numberColumn} onValueChange={setX_var} />
+          <MultipleDropDown
+            columnNames={numberColumn}
+            setSelectedColumns={setActiveNumberColumns}
+          />
         </div>
         <div className="w-full">
           <p className="text-lg font-medium tracking-wide">Y Variable</p>
           <SingleDropDown columnNames={numberColumn} onValueChange={setY_var} />
         </div>
-        <div className="w-full flex flex-col gap-4 mt-4 tracking-wider">
-          <Checkbox color="success" onChange={(e) => setShowTitle(e.valueOf())}>
-            Title
-          </Checkbox>
+        <div className="w-full">
           <Checkbox
             color="success"
-            defaultSelected
+            isSelected={scatter}
             onChange={(e) => setScatter(e.valueOf())}
           >
             Scatter
@@ -88,25 +111,17 @@ function RegPlot({ csvData }) {
         </div>
       </div>
 
-      {showTitle && (
-        <div className="mt-4">
-          <Input
-            clearable
-            bordered
-            color="success"
-            size="lg"
-            label="Input Title"
-            placeholder="Enter your desired title"
-            fullWidth
-            value={titleValue}
-            onChange={(e) => setTitleValue(e.target.value)}
-            helperText="Press Enter to apply"
-            onKeyDown={(e) => {
-              if (e.key === "Enter") setTitle(titleValue);
-            }}
-          />
-        </div>
-      )}
+      <div className="flex justify-end mt-4 my-12">
+        <button
+          className="border-2 px-6 tracking-wider bg-primary-btn text-white font-medium rounded-md py-2"
+          onClick={handleGenerate}
+          disabled={loading}
+        >
+          Generate
+        </button>
+      </div>
+
+      {/* Loading Indicator */}
       {loading && (
         <div className="grid place-content-center mt-12 w-full h-full">
           <Loading color={"success"} size="xl">
@@ -114,15 +129,12 @@ function RegPlot({ csvData }) {
           </Loading>
         </div>
       )}
-      {plotlyData && (
-        <div className="flex justify-center mt-4">
-          <Plot
-            data={plotlyData?.data}
-            layout={{ ...plotlyData.layout, showlegend: true }}
-            config={{ editable: true, responsive: true }}
-          />
-        </div>
-      )}
+
+      {/* Error Message */}
+      {error && <div className="mt-4 text-red-500 text-center">{error}</div>}
+
+      {/* Render Plotly Figures using LayoutSelector */}
+      {plotlyData.length > 0 && <LayoutSelector plotlyData={plotlyData} />}
     </div>
   );
 }
