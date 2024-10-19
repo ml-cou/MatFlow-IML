@@ -50,8 +50,10 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework',
     'pso',
-    "pfs",
-    "dataset_manager"
+    'pfs',
+    'eda',
+    "dataset_manager",
+    # 'graph_analysis'
 ]
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
