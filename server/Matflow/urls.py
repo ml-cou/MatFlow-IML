@@ -10,6 +10,6 @@ urlpatterns = [
     path('api/', include('matflow_test.urls')),
     path('api/', include('eda.urls')),
     path('api/', include('dataset_manager.urls')),
-    #path('api/', include('graph_analysis.urls')),
+    # path('api/', include('graph_analysis.urls')),
 
 ]
