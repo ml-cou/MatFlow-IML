@@ -25,7 +25,9 @@ function SelectKBest({ csvData }) {
     if (method === "SelectKBest") {
       (async function () {
         const res = await fetch(
-          "http://127.0.0.1:8000/api/feature_selection/",
+          `${import.meta.env.VITE_APP_API_URL}${
+            import.meta.env.VITE_APP_API_FEATURE_SELECTION
+          }`,
           {
             method: "POST",
             headers: {
@@ -42,9 +44,8 @@ function SelectKBest({ csvData }) {
         );
 
         const Data = await res.json();
-        
+
         setData(Data.selected_features);
-        
       })();
     }
   }, [method, best_Kfeature, score_func, target_var, csvData]);

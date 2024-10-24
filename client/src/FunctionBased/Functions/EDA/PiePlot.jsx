@@ -47,20 +47,25 @@ function PiePlot({ csvData }) {
       setPlotlyData([]); // Reset plotlyData
       setError(null); // Reset error state
 
-      const resp = await fetch("http://127.0.0.1:8000/api/eda/pieplot/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          cat: activeStringColumn.length > 0 ? activeStringColumn : "-", // Ensure it's a list
-          file: csvData,
-          title: title || "",
-          label,
-          percentage,
-          gap,
-        }),
-      });
+      const resp = await fetch(
+        `${import.meta.env.VITE_APP_API_URL}${
+          import.meta.env.VITE_APP_API_EDA_PIEPLOT
+        }`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            cat: activeStringColumn.length > 0 ? activeStringColumn : "-", // Ensure it's a list
+            file: csvData,
+            title: title || "",
+            label,
+            percentage,
+            gap,
+          }),
+        }
+      );
 
       if (!resp.ok) {
         const errorData = await resp.json();

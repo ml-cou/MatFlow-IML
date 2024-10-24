@@ -58,7 +58,9 @@ function DecisionTreeClassification({
     try {
       setLoading(true);
       const res = await fetch(
-        "http://127.0.0.1:8000/api/hyperparameter_optimization/",
+        `${import.meta.env.VITE_APP_API_URL}${
+          import.meta.env.VITE_APP_API_HYPERPARAMETER_OPTIMIZATION
+        }`,
         {
           method: "POST",
           headers: {

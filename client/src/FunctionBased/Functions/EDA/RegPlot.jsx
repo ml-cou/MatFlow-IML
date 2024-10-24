@@ -46,19 +46,24 @@ function RegPlot({ csvData }) {
       setPlotlyData([]); // Reset plotlyData
       setError(null); // Reset error state
 
-      const resp = await fetch("http://127.0.0.1:8000/api/eda/regplot/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          x_var: activeNumberColumns,
-          y_var,
-          title: title || "",
-          scatter,
-          file: csvData,
-        }),
-      });
+      const resp = await fetch(
+        `${import.meta.env.VITE_APP_API_URL}${
+          import.meta.env.VITE_APP_API_EDA_REGPLOT
+        }`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            x_var: activeNumberColumns,
+            y_var,
+            title: title || "",
+            scatter,
+            file: csvData,
+          }),
+        }
+      );
 
       if (!resp.ok) {
         const errorData = await resp.json();

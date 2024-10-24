@@ -133,20 +133,25 @@ function SplitDataset({
       if (!trainDataName || !testDataName)
         throw new Error("Dataset name field cannot be empty");
 
-      const res = await fetch("http://127.0.0.1:8000/api/split_dataset/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          target_variable,
-          stratify,
-          test_size,
-          random_state,
-          shuffle,
-          file: csvData,
-        }),
-      });
+      const res = await fetch(
+        `${import.meta.env.VITE_APP_API_URL}${
+          import.meta.env.VITE_APP_API_SPLIT_DATASET
+        }`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            target_variable,
+            stratify,
+            test_size,
+            random_state,
+            shuffle,
+            file: csvData,
+          }),
+        }
+      );
       const data = await res.json();
 
       const tempTrainName = "train_" + trainDataName;

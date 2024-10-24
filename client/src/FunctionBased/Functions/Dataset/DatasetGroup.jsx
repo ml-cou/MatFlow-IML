@@ -52,17 +52,22 @@ function DatasetGroup({ csvData }) {
     if (initialData && initialData.length) {
       const fetchData = async () => {
         try {
-          const res = await fetch("http://127.0.0.1:8000/api/display_group/", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              file: initialData,
-              group_var: selectedColumns,
-              agg_func: selectValue,
-            }),
-          });
+          const res = await fetch(
+            `${import.meta.env.VITE_APP_API_URL}${
+              import.meta.env.VITE_APP_API_DISPLAY_GROUP
+            }`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                file: initialData,
+                group_var: selectedColumns,
+                agg_func: selectValue,
+              }),
+            }
+          );
 
           let { data } = await res.json();
           const tempData = JSON.parse(data);

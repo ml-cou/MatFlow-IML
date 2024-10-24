@@ -42,18 +42,23 @@ function BestOverallFeature({ csvData }) {
       setData();
     } else if (e === "All") {
       setLoading(true);
-      const res = await fetch("http://127.0.0.1:8000/api/feature_selection/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          method: selectionMethod,
-          k_fold,
-          target_var,
-          dataset: csvData,
-        }),
-      });
+      const res = await fetch(
+        `${import.meta.env.VITE_APP_API_URL}${
+          import.meta.env.VITE_APP_API_FEATURE_SELECTION
+        }`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            method: selectionMethod,
+            k_fold,
+            target_var,
+            dataset: csvData,
+          }),
+        }
+      );
 
       setProgress(100);
       clearInterval(intervalId);

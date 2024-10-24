@@ -53,21 +53,26 @@ function BoxPlot({ csvData }) {
       setPlotlyData([]);
       setError(null); // Reset error state
 
-      const resp = await fetch("http://127.0.0.1:8000/api/eda/boxplot/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          cat: activeStringColumn.length > 0 ? activeStringColumn : "-", // Handle multiple categorical variables
-          num: activeNumberColumn || "-",
-          hue: activeHueColumn || "-",
-          orient: orientation,
-          dodge: dodge,
-          title: "", // Remove local title; handled by LayoutSelector
-          file: csvData,
-        }),
-      });
+      const resp = await fetch(
+        `${import.meta.env.VITE_APP_API_URL}${
+          import.meta.env.VITE_APP_API_EDA_BOXPLOT
+        }`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            cat: activeStringColumn.length > 0 ? activeStringColumn : "-", // Handle multiple categorical variables
+            num: activeNumberColumn || "-",
+            hue: activeHueColumn || "-",
+            orient: orientation,
+            dodge: dodge,
+            title: "", // Remove local title; handled by LayoutSelector
+            file: csvData,
+          }),
+        }
+      );
 
       if (!resp.ok) {
         const errorData = await resp.json();

@@ -124,7 +124,9 @@ function DatasetCorrelation({ csvData }) {
     if (relationMethod === "kendall") {
       const fetchData = async () => {
         const resp = await fetch(
-          "http://127.0.0.1:8000/api/display_correlation/",
+          `${import.meta.env.VITE_APP_API_URL}${
+            import.meta.env.VITE_APP_API_DISPLAY_CORRELATION
+          }`,
           {
             method: "POST",
             headers: {
@@ -221,7 +223,9 @@ function DatasetCorrelation({ csvData }) {
     if (displayType === "heatmap") {
       const fetchData = async () => {
         const res = await fetch(
-          "http://127.0.0.1:8000/api/display_correlation_heatmap/",
+          `${import.meta.env.VITE_APP_API_URL}${
+            import.meta.env.VITE_APP_API_DISPLAY_HEATMAP
+          }`,
           {
             method: "POST",
             headers: {

@@ -19,8 +19,6 @@ function AppendDataset({ csvData }) {
   const render = useSelector((state) => state.uploadedFile.rerender);
   const dispatch = useDispatch();
 
-  
-
   useEffect(() => {
     let temp = JSON.parse(localStorage.getItem("uploadedFiles"));
     if (temp && temp.length > 1) {
@@ -40,16 +38,21 @@ function AppendDataset({ csvData }) {
 
   const handleSave = async () => {
     try {
-      const res = await fetch("http://127.0.0.1:8000/api/append/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          file: csvData,
-          file2: anotherCsvData,
-        }),
-      });
+      const res = await fetch(
+        `${import.meta.env.VITE_APP_API_URL}${
+          import.meta.env.VITE_APP_API_APPEND
+        }`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            file: csvData,
+            file2: anotherCsvData,
+          }),
+        }
+      );
       let Data = await res.json();
       Data = JSON.parse(Data);
       let fileName = new_dataset_name;

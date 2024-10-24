@@ -1,5 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { Button, FormControl, InputLabel, MenuItem, Select, TextField, Typography } from "@mui/material";
+import {
+  Button,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+  TextField,
+  Typography,
+} from "@mui/material";
 import MultipleDropDown from "../../../Components/MultipleDropDown/MultipleDropDown";
 import CustomSlider from "../../../Components/CustomSlider/CustomSlider";
 import SingleDropDown from "../../../Components/SingleDropDown/SingleDropDown";
@@ -172,13 +180,18 @@ function InvML({ csvData }) {
     setProgress(0);
 
     // Send the POST request
-    fetch("http://localhost:8000/api/optimize/", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(requestData),
-    })
+    fetch(
+      `${import.meta.env.VITE_APP_API_URL}${
+        import.meta.env.VITE_APP_API_OPTIMIZE
+      }`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestData),
+      }
+    )
       .then((response) => response.json())
       .then((data) => {
         // Handle the response data

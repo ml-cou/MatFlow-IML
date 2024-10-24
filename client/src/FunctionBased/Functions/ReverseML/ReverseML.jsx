@@ -26,18 +26,23 @@ function ReverseML({ csvData }) {
 
   const handleSave = async () => {
     try {
-      const res = await fetch("http://127.0.0.1:8000/api/reverseml/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          file: csvData,
-          "Select Feature": selectFeature,
-          "Select Target Variable": targetVariable,
-          "Enter Values": enterValues,
-        }),
-      });
+      const res = await fetch(
+        `${import.meta.env.VITE_APP_API_URL}${
+          import.meta.env.VITE_APP_API_REVERSEML
+        }`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            file: csvData,
+            "Select Feature": selectFeature,
+            "Select Target Variable": targetVariable,
+            "Enter Values": enterValues,
+          }),
+        }
+      );
       const data = await res.json();
       setMlData(data);
       const temp = Object.keys(data[0]).map((val) => ({

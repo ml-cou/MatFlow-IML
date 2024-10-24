@@ -78,15 +78,20 @@ function Imputation({
     // setActiveStrategy();
 
     const fetchData = async () => {
-      const res = await fetch("http://127.0.0.1:8000/api/imputation_data1", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          file: csvData,
-        }),
-      });
+      const res = await fetch(
+        `${import.meta.env.VITE_APP_API_URL}${
+          import.meta.env.VITE_APP_API_IMPUTATION_DATA1
+        }`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            file: csvData,
+          }),
+        }
+      );
 
       const data = await res.json();
 
@@ -105,19 +110,24 @@ function Imputation({
   }, [csvData, select_column]);
 
   const handleSave = async () => {
-    const res = await fetch("http://127.0.0.1:8000/api/imputation_result", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        file: csvData,
-        Select_columns: select_column,
-        strategy: activeStrategy === "mode" ? "constant" : activeStrategy,
-        fill_group,
-        constant,
-      }),
-    });
+    const res = await fetch(
+      `${import.meta.env.VITE_APP_API_URL}${
+        import.meta.env.VITE_APP_API_IMPUTATION_RESULT
+      }`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          file: csvData,
+          Select_columns: select_column,
+          strategy: activeStrategy === "mode" ? "constant" : activeStrategy,
+          fill_group,
+          constant,
+        }),
+      }
+    );
 
     let Data = await res.json();
 
@@ -155,16 +165,21 @@ function Imputation({
     else setStrategy(["mode", "value"]);
     setSelectColumn(e);
 
-    const res = await fetch("http://127.0.0.1:8000/api/imputation_data2", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        file: csvData,
-        Select_columns: e,
-      }),
-    });
+    const res = await fetch(
+      `${import.meta.env.VITE_APP_API_URL}${
+        import.meta.env.VITE_APP_API_IMPUTATION_DATA2
+      }`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          file: csvData,
+          Select_columns: e,
+        }),
+      }
+    );
 
     const data = await res.json();
 

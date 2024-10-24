@@ -62,13 +62,18 @@ function AddModify({ csvData }) {
   const handleSave = async () => {
     console.log(featureData);
     try {
-      const res = await fetch("http://127.0.0.1:8000/api/feature_creation/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(featureData),
-      });
+      const res = await fetch(
+        `${import.meta.env.VITE_APP_API_URL}${
+          import.meta.env.VITE_APP_API_FEATURE_CREATION
+        }`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(featureData),
+        }
+      );
       let data = await res.json();
       let fileName = activeCsvFile.name;
 

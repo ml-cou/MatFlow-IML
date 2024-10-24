@@ -108,22 +108,27 @@ function ModelPrediction({ csvData }) {
       }
       setLoading(true);
       const tempCsv = await fetchDataFromIndexedDB(select_data);
-     
-      const res = await fetch("http://127.0.0.1:8000/api/model_prediction/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          "Target Variable": target_variable,
-          model: modelData.metrics_table,
-          file: tempCsv,
-          Result: result,
-          y_pred: modelData.y_pred,
-          type: modelData.type,
-          regressor: modelData.regressor,
-        }),
-      });
+
+      const res = await fetch(
+        `${import.meta.env.VITE_APP_API_URL}${
+          import.meta.env.VITE_APP_API_MODEL_PREDICTION
+        }`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            "Target Variable": target_variable,
+            model: modelData.metrics_table,
+            file: tempCsv,
+            Result: result,
+            y_pred: modelData.y_pred,
+            type: modelData.type,
+            regressor: modelData.regressor,
+          }),
+        }
+      );
 
       const Data = await res.json();
 

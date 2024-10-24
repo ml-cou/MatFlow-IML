@@ -85,23 +85,28 @@ function ModelDeployment({ csvData }) {
     }
     if (sp_ind !== -1) {
       setTargetVal(splitted_datasets[sp_ind][name][3]);
-      
+
       const train = await ReadFile({
         foldername: splitted_datasets[sp_ind][name][5],
         filename: splitted_datasets[sp_ind][name][1] + ".csv",
       });
 
       setTrainData(train);
-      const res = await fetch("http://127.0.0.1:8000/api/deploy_data/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          train,
-          target_var: splitted_datasets[sp_ind][name][3],
-        }),
-      });
+      const res = await fetch(
+        `${import.meta.env.VITE_APP_API_URL}${
+          import.meta.env.VITE_APP_API_DEPLOY_DATA
+        }`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            train,
+            target_var: splitted_datasets[sp_ind][name][3],
+          }),
+        }
+      );
       const data = await res.json();
 
       console.log(data);
@@ -132,18 +137,23 @@ function ModelDeployment({ csvData }) {
       result = { ...result, [val.col]: val.value };
     });
 
-    const res2 = await fetch("http://127.0.0.1:8000/api/deploy_result/", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model_deploy,
-        result,
-        train: train_data,
-        target_var: target_val,
-      }),
-    });
+    const res2 = await fetch(
+      `${import.meta.env.VITE_APP_API_URL}${
+        import.meta.env.VITE_APP_API_DEPLOY_RESULT
+      }`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model_deploy,
+          result,
+          train: train_data,
+          target_var: target_val,
+        }),
+      }
+    );
 
     const dat = await res2.json();
 

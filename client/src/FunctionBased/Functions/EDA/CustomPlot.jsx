@@ -43,18 +43,23 @@ function CustomPlot({ csvData }) {
     try {
       setLoading(true);
       setPlotlyData([]);
-      const resp = await fetch("http://127.0.0.1:8000/api/eda/customplot/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          file: csvData,
-          x_var,
-          y_var: y_bar,
-          hue: activeHue || "None",
-        }),
-      });
+      const resp = await fetch(
+        `${import.meta.env.VITE_APP_API_URL}${
+          import.meta.env.VITE_APP_API_EDA_CUSTOMPLOT
+        }`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            file: csvData,
+            x_var,
+            y_var: y_bar,
+            hue: activeHue || "None",
+          }),
+        }
+      );
 
       if (!resp.ok) {
         const errorData = await resp.json();
@@ -62,7 +67,7 @@ function CustomPlot({ csvData }) {
       }
 
       let data = await resp.json();
-      console.log(data)
+      console.log(data);
       data = data.plotly;
       setPlotlyData(data);
     } catch (error) {

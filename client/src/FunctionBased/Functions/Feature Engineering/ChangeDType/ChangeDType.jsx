@@ -47,17 +47,22 @@ function ChangeDType({ csvData }) {
 
   const handleSave = async () => {
     try {
-      const res = await fetch("http://127.0.0.1:8000/api/change_dtype/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          number_of_columns: numberOfColumns,
-          data,
-          file: csvData,
-        }),
-      });
+      const res = await fetch(
+        `${import.meta.env.VITE_APP_API_URL}${
+          import.meta.env.VITE_APP_API_CHANGE_DTYPE
+        }`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            number_of_columns: numberOfColumns,
+            data,
+            file: csvData,
+          }),
+        }
+      );
       let Data = await res.json();
 
       let fileName = activeCsvFile.name;

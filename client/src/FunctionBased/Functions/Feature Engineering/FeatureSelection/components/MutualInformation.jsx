@@ -14,7 +14,9 @@ function MutualInformation({ csvData }) {
     if (method === "Mutual Information") {
       (async function () {
         const res = await fetch(
-          "http://127.0.0.1:8000/api/feature_selection/",
+          `${import.meta.env.VITE_APP_API_URL}${
+            import.meta.env.VITE_APP_API_FEATURE_SELECTION
+          }`,
           {
             method: "POST",
             headers: {
@@ -29,7 +31,7 @@ function MutualInformation({ csvData }) {
         );
 
         const Data = await res.json();
-        
+
         setData(Data.selected_features);
       })();
     }

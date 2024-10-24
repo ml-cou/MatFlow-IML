@@ -102,24 +102,27 @@ function Histogram({csvData}) {
             setPlotlyData([]); // Reset plotlyData
             setError(null); // Reset error state
 
-            const resp = await fetch("http://127.0.0.1:8000/api/eda/histogram/", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    var: activeNumberColumn.length > 0 ? activeNumberColumn : "-", // Ensure it's a list
-                    hue: activeHueColumn || "-",
-                    orient: orientation,
-                    title: title || "",
-                    file: csvData,
-                    agg: aggregate,
-                    autoBin: !showAutoBin ? autoBinValue : 0,
-                    kde: KDE,
-                    legend: legend,
-                    color_palette: colorPalette, // Optional: Allow user to select or hardcode
-                }),
-            });
+            const resp = await fetch(
+                `${import.meta.env.VITE_APP_API_URL}${
+                    import.meta.env.VITE_APP_API_EDA_HISTOGRAM}`,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        var: activeNumberColumn.length > 0 ? activeNumberColumn : "-", // Ensure it's a list
+                        hue: activeHueColumn || "-",
+                        orient: orientation,
+                        title: title || "",
+                        file: csvData,
+                        agg: aggregate,
+                        autoBin: !showAutoBin ? autoBinValue : 0,
+                        kde: KDE,
+                        legend: legend,
+                        color_palette: colorPalette, // Optional: Allow user to select or hardcode
+                    }),
+                });
 
             if (!resp.ok) {
                 const errorData = await resp.json();
@@ -145,53 +148,53 @@ function Histogram({csvData}) {
         }
     };
 
-  return (
-    <div>
-      {/* Dropdowns for selecting variables */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 items-center gap-8 mt-8">
-        <div className="w-full">
-          <p className="text-lg font-medium tracking-wide">Variable</p>
-          <MultipleDropDown
-            columnNames={numberColumn}
-            setSelectedColumns={setActiveNumberColumn}
-          />
-        </div>
-        <div className="w-full">
-          <p className="text-lg font-medium tracking-wide">Hue</p>
-          <SingleDropDown
-            onValueChange={setActiveHueColumn}
-            columnNames={stringColumn}
-          />
-        </div>
-        <div className="w-full flex flex-col gap-1">
-          <label className="text-lg font-medium tracking-wide">
-            Aggregate Statistics
-          </label>
-          <select
-            value={aggregate}
-            className="bg-transparent p-2 focus:border-[#06603b] border-2 rounded-lg"
-            onChange={(e) => setAggregate(e.target.value)}
-          >
-            <option value="probability">Probability</option>
-            <option value="count">Count</option>
-            <option value="percent">Percent</option>
-            <option value="density">Density</option>
-          </select>
-        </div>
-        <div className="w-full flex flex-col gap-1">
-          <label className="text-lg font-medium tracking-wide">
-            Orientation
-          </label>
-          <select
-            value={orientation}
-            className="bg-transparent p-2 focus:border-[#06603b] border-2 rounded-lg"
-            onChange={(e) => setOrientation(e.target.value)}
-          >
-            <option value="Vertical">Vertical</option>
-            <option value="Horizontal">Horizontal</option>
-          </select>
-        </div>
-      </div>
+    return (
+        <div>
+            {/* Dropdowns for selecting variables */}
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 items-center gap-8 mt-8">
+                <div className="w-full">
+                    <p className="text-lg font-medium tracking-wide">Variable</p>
+                    <MultipleDropDown
+                        columnNames={numberColumn}
+                        setSelectedColumns={setActiveNumberColumn}
+                    />
+                </div>
+                <div className="w-full">
+                    <p className="text-lg font-medium tracking-wide">Hue</p>
+                    <SingleDropDown
+                        onValueChange={setActiveHueColumn}
+                        columnNames={stringColumn}
+                    />
+                </div>
+                <div className="w-full flex flex-col gap-1">
+                    <label className="text-lg font-medium tracking-wide">
+                        Aggregate Statistics
+                    </label>
+                    <select
+                        value={aggregate}
+                        className="bg-transparent p-2 focus:border-[#06603b] border-2 rounded-lg"
+                        onChange={(e) => setAggregate(e.target.value)}
+                    >
+                        <option value="probability">Probability</option>
+                        <option value="count">Count</option>
+                        <option value="percent">Percent</option>
+                        <option value="density">Density</option>
+                    </select>
+                </div>
+                <div className="w-full flex flex-col gap-1">
+                    <label className="text-lg font-medium tracking-wide">
+                        Orientation
+                    </label>
+                    <select
+                        value={orientation}
+                        className="bg-transparent p-2 focus:border-[#06603b] border-2 rounded-lg"
+                        onChange={(e) => setOrientation(e.target.value)}
+                    >
+                        <option value="Vertical">Vertical</option>
+                        <option value="Horizontal">Horizontal</option>
+                    </select>
+                </div>
+            </div>
 
             {/* Checkboxes for additional options */}
             <div className="flex items-center gap-4 mt-4 tracking-wider">

@@ -24,29 +24,33 @@ function MergeDataset({ csvData }) {
   const [leftDataframeValue, setLeftDataframeValue] = useState();
   const [rightDataframeValue, setRightDataframeValue] = useState();
   const [secondDatasetName, setSecondDatasetName] = useState("");
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
   const render = useSelector((state) => state.uploadedFile.rerender);
 
   const handleSave = async () => {
     try {
-      const res = await fetch("http://127.0.0.1:8000/api/merge_dataset/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          how,
-          left_dataframe: leftDataframeValue,
-          right_dataframe: rightDataframeValue,
-          file: csvData,
-          file2: anotherCsvData
-        }),
-      });
+      const res = await fetch(
+        `${import.meta.env.VITE_APP_API_URL}${
+          import.meta.env.VITE_APP_API_MERGE_DATASET
+        }`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            how,
+            left_dataframe: leftDataframeValue,
+            right_dataframe: rightDataframeValue,
+            file: csvData,
+            file2: anotherCsvData,
+          }),
+        }
+      );
       let Data = await res.json();
-      Data = JSON.parse(Data)
+      Data = JSON.parse(Data);
 
       let fileName = new_dataset_name;
-
 
       const uploadedFiles = JSON.parse(localStorage.getItem("uploadedFiles"));
       const fileExist = uploadedFiles.filter((val) => val.name === fileName);
@@ -69,7 +73,7 @@ function MergeDataset({ csvData }) {
         progress: undefined,
         theme: "colored",
       });
-      dispatch(setReRender(!render))
+      dispatch(setReRender(!render));
     } catch (error) {
       toast.error(error.message, {
         position: "bottom-right",

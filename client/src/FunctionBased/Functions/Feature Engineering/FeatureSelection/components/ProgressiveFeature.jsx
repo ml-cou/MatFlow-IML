@@ -70,32 +70,34 @@ function ProgressiveFeature({ csvData }) {
     }
 
     try {
-      const response = await fetch("http://localhost:8000/api/pfs/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_APP_API_URL}${
+          import.meta.env.VITE_APP_API_PFS
+        }`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        }
+      );
 
       const data = await response.json();
 
       if (data.error) {
         // Extract the first line of the error message
-        const firstErrorLine = data.error.split("\n").slice(0, 2).join('');
+        const firstErrorLine = data.error.split("\n").slice(0, 2).join("");
         setErrorMessage(firstErrorLine); // Set the error message
-        toast.error(
-          firstErrorLine,
-          {
-            position: "bottom-right",
-            autoClose: 5000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            theme: "colored",
-          }
-        );
+        toast.error(firstErrorLine, {
+          position: "bottom-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          theme: "colored",
+        });
       } else {
         setResponse(data); // Save the response to render the information
       }

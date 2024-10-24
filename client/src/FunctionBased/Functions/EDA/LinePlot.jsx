@@ -53,21 +53,26 @@ function LinePlot({ csvData }) {
       setPlotlyData([]); // Reset plotlyData
       setError(null); // Reset error state
 
-      const resp = await fetch("http://127.0.0.1:8000/api/eda/lineplot/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          x_var,
-          y_var,
-          hue: activeHueColumn || "-",
-          style: style || "-",
-          legend,
-          title: title || "",
-          file: csvData,
-        }),
-      });
+      const resp = await fetch(
+        `${import.meta.env.VITE_APP_API_URL}${
+          import.meta.env.VITE_APP_API_EDA_LINEPLOT
+        }`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            x_var,
+            y_var,
+            hue: activeHueColumn || "-",
+            style: style || "-",
+            legend,
+            title: title || "",
+            file: csvData,
+          }),
+        }
+      );
 
       if (!resp.ok) {
         const errorData = await resp.json();

@@ -46,16 +46,21 @@ function TimeSeriesAnalysis({ csvData }) {
 
   useEffect(() => {
     const fetchData = async () => {
-      const res = await fetch("http://127.0.0.1:8000/api/time_series/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          file: csvData,
-          select_column: target_variable,
-        }),
-      });
+      const res = await fetch(
+        `${import.meta.env.VITE_APP_API_URL}${
+          import.meta.env.VITE_APP_API_TIME_SERIES
+        }`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            file: csvData,
+            select_column: target_variable,
+          }),
+        }
+      );
       const data = await res.json();
       if (data.error) {
         setDateTimeWarning(true);
@@ -85,7 +90,9 @@ function TimeSeriesAnalysis({ csvData }) {
   const handleSave = async () => {
     try {
       const res = await fetch(
-        "http://127.0.0.1:8000/api/time_series_analysis/",
+        `${import.meta.env.VITE_APP_API_URL}${
+          import.meta.env.VITE_APP_API_TIME_SERIES_ANALYSIS
+        }`,
         {
           method: "POST",
           headers: {

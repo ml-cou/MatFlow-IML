@@ -56,22 +56,26 @@ function Encoding({
 
   const handleSave = async () => {
     try {
-      const res = await fetch("http://127.0.0.1:8000/api/encoding/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          select_column: stringColumn,
-          method,
-          data,
-          file: csvData,
-        }),
-      });
+      const res = await fetch(
+        `${import.meta.env.VITE_APP_API_URL}${
+          import.meta.env.VITE_APP_API_ENCODING
+        }`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            select_column: stringColumn,
+            method,
+            data,
+            file: csvData,
+          }),
+        }
+      );
       let Data = await res.json();
 
       let fileName = activeCsvFile.name;
-     
 
       const uploadedFiles = JSON.parse(localStorage.getItem("uploadedFiles"));
       const fileExist = uploadedFiles.filter((val) => val.name === fileName);

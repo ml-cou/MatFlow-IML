@@ -76,19 +76,24 @@ function ModelEvaluation() {
           "Select Orientation": orientation,
           Columns: selectedColumn,
         });
-        const res = await fetch("http://127.0.0.1:8000/api/model_evaluation/", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            file,
-            "Display Type": display_type,
-            "Display Result": display_result,
-            "Select Orientation": orientation,
-            Columns: selectedColumn,
-          }),
-        });
+        const res = await fetch(
+          `${import.meta.env.VITE_APP_API_URL}${
+            import.meta.env.VITE_APP_API_MODEL_EVALUATION
+          }`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              file,
+              "Display Type": display_type,
+              "Display Result": display_result,
+              "Select Orientation": orientation,
+              Columns: selectedColumn,
+            }),
+          }
+        );
         const data = await res.json();
         setGraphData(JSON.parse(data));
         console.log(JSON.parse(data));

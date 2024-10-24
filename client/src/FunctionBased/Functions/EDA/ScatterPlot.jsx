@@ -47,19 +47,24 @@ function ScatterPlot({ csvData }) {
       setLoading(true);
       setPlotlyData([]);
       setError(null); // Reset error state
-      const resp = await fetch("http://127.0.0.1:8000/api/eda/scatterplot/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          x_var,
-          y_var,
-          hue: activeHueColumn || "-",
-          title: title || "",
-          file: csvData,
-        }),
-      });
+      const resp = await fetch(
+        `${import.meta.env.VITE_APP_API_URL}${
+          import.meta.env.VITE_APP_API_EDA_SCATTERPLOT
+        }`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            x_var,
+            y_var,
+            hue: activeHueColumn || "-",
+            title: title || "",
+            file: csvData,
+          }),
+        }
+      );
 
       if (!resp.ok) {
         const errorData = await resp.json();

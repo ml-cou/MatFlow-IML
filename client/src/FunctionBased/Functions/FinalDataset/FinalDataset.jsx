@@ -12,7 +12,11 @@ function FinalDataset() {
     // Fetch the list of files from the backend when the component mounts
     const fetchFileNames = async () => {
       try {
-        const response = await fetch("http://localhost:8000/api/dataset/");
+        const response = await fetch(
+          `${import.meta.env.VITE_APP_API_URL}${
+            import.meta.env.VITE_APP_API_DATASET
+          }`
+        );
         if (!response.ok) {
           throw new Error(`Error fetching file names: ${response.statusText}`);
         }
@@ -71,7 +75,7 @@ function FinalDataset() {
 
       // Fetch the file data from the backend
       const response = await fetch(
-        `http://localhost:8000/api/dataset?${params.toString()}`
+        `${import.meta.env.VITE_APP_API_URL}/api/dataset?${params.toString()}`
       );
       if (!response.ok) {
         throw new Error(
@@ -83,7 +87,7 @@ function FinalDataset() {
       // Update fileData state with the fetched data
       setFileData((prevData) => ({
         ...prevData,
-        [fileIndex-1]: data,
+        [fileIndex - 1]: data,
       }));
     } catch (err) {
       console.error(err);

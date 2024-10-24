@@ -61,18 +61,23 @@ function Cluster({
 
   const handleSave = async () => {
     try {
-      const res = await fetch("http://127.0.0.1:8000/api/cluster/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          file: csvData,
-          display_type,
-          target_variable,
-          data,
-        }),
-      });
+      const res = await fetch(
+        `${import.meta.env.VITE_APP_API_URL}${
+          import.meta.env.VITE_APP_API_CLUSTER
+        }`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            file: csvData,
+            display_type,
+            target_variable,
+            data,
+          }),
+        }
+      );
       let Data = await res.json();
 
       setGraphTableData(Data);

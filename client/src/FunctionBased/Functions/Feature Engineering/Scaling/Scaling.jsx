@@ -65,19 +65,24 @@ function Scaling({
 
   const handleSave = async () => {
     try {
-      const res = await fetch("http://127.0.0.1:8000/api/scaling/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          options: option,
-          method,
-          default_value: defaultValue,
-          select_column: selectedColumns,
-          file: csvData,
-        }),
-      });
+      const res = await fetch(
+        `${import.meta.env.VITE_APP_API_URL}${
+          import.meta.env.VITE_APP_API_SCALING
+        }`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            options: option,
+            method,
+            default_value: defaultValue,
+            select_column: selectedColumns,
+            file: csvData,
+          }),
+        }
+      );
       let Data = await res.json();
 
       let fileName = activeCsvFile.name;
