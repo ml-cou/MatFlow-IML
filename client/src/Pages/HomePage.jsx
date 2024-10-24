@@ -39,7 +39,7 @@ function HomePage() {
         </div>
         <div className="order-1 md:order-2 w-1/2">
           <img
-            src="/iso-ai.jpg"
+            src="iso-ai.jpg"
             alt=""
             className="w-full max-h-[700px] h-full object-contain object-center"
           />
@@ -61,7 +61,7 @@ function HomePage() {
           <div className="border border-gray-300 shadow-md py-4 mt-4 px-4 flex flex-col items-center rounded gap-3">
             <div>
               <img
-                src="/field-of-view.png"
+                src="field-of-view.png"
                 alt=""
                 className="w-28 h-full max-h-28"
               />
@@ -76,7 +76,7 @@ function HomePage() {
           <div className="flex flex-col border border-gray-300 shadow-md py-4 mt-4 px-4 items-center rounded gap-3">
             <div>
               <img
-                src="/translator.png"
+                src="translator.png"
                 alt=""
                 className="w-28 h-full max-h-28"
               />
@@ -92,7 +92,7 @@ function HomePage() {
           <div className="flex flex-col border border-gray-300 shadow-md py-4 mt-4 px-4 items-center rounded gap-3">
             <div>
               <img
-                src="/analysis.png"
+                src="analysis.png"
                 alt=""
                 className="w-28 h-full max-h-28"
               />
@@ -109,7 +109,7 @@ function HomePage() {
           <div className="flex flex-col border border-gray-300 shadow-md py-4 mt-4 px-4 items-center rounded gap-3">
             <div>
               <img
-                src="/presentation.png"
+                src="presentation.png"
                 alt=""
                 className="w-28 h-full max-h-28"
               />
@@ -153,7 +153,7 @@ function HomePage() {
       {/* Fourth Section */}
       <div className="max-w-[1000px] mx-auto my-12 text-center p-12">
         <h1 className="font-titillium font-bold text-4xl mb-12">ML Lifecycle with MATFLOW</h1>
-        <img src="/lifecycle.png" alt="" className="-translate-x-5" />
+        <img src="lifecycle.png" alt="" className="-translate-x-5" />
       </div>
 
       {/* Fifth Section */}
