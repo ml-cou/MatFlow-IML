@@ -3,11 +3,11 @@ import { Link } from "react-router-dom";
 import feature_img from "./Feature_collage.svg";
 
 const Technologies = [
-  "/python.png",
-  "/jupyter.png",
-  "/scikit.png",
-  "/seaborn.png",
-  "/pandas.png",
+  "python.png",
+  "jupyter.png",
+  "scikit.png",
+  "seaborn.png",
+  "pandas.png",
 ];
 
 function HomePage() {
